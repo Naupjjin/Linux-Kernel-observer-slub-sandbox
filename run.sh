@@ -1,0 +1,12 @@
+qemu-system-x86_64 \
+        -kernel ./bzImage \
+        -initrd ./initramfs.cpio \
+        -cpu qemu64,+smap,+smep \
+        -smp 1 \
+        -m 1G \
+        -append "console=ttyS0 quiet loglevel=7 oops=panic panic_on_warn=1 panic=-1 pti=on nokaslr" \
+        -no-reboot \
+        -nographic \
+        -monitor /dev/null \
+        -gdb tcp::1234 \
+        -S
