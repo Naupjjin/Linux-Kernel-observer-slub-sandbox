@@ -1,57 +1,28 @@
-import gdb
-import re
+KMEM_CACHE_OFFSET = {
+    "cpu_slab": 0,
+    "flags": 8,
+    "min_partial": 16,
+    "size": 24,
+    "object_size": 28,
+    "reciprocal_size": 32,       
+    "offset": 40,
+    "cpu_partial": 44,
+    "cpu_partial_slabs": 48,
+    "oo": 52,
+    "min": 56,
+    "allocflags": 60,
+    "refcount": 64,
+    "ctor": 72,
+    "inuse": 80,
+    "align": 84,
+    "red_left_pad": 88,
+    "name": 96,
+    "list": 104,
+    "kobj": 120,
+    "remote_node_defrag_ratio": 184,
+    "node": 192,
+}
 
-def remove_ansi_colors(text):
-    ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
-    return ansi_escape.sub('', text)
-
-class FindSlubCache(gdb.Command):
-    """
-    Linux kernel 6.15.7 
-    Usage: kmem-cache-info
-    by. naup96321
-
-    kmem-cache-info <address>
-    """
-
-    def __init__(self):
-        super(FindSlubCache, self).__init__("kmem-cache-info", gdb.COMMAND_USER)
-        self.kmem_cache = 0
-        self.kmem_cache_t_cpu_slab = 0
-        self.kmem_cache_t_flags = 0
-        self.kmem_cache_t_object_size = 0
-        
-
-    def invoke(self, arg, from_tty):
-
-        arg = arg.strip().split()
-        self.kmem_cache = int(arg[0], 16)
-        self.flags = self.kmem_cache
-
-
-        
-
-'''
-/*
- * The slab lists for all objects.
- */
-struct kmem_cache_node {
-	spinlock_t list_lock;
-	unsigned long nr_partial;
-	struct list_head partial;
-#ifdef CONFIG_SLUB_DEBUG
-	atomic_long_t nr_slabs;
-	atomic_long_t total_objects;
-	struct list_head full;
-#endif
-};
-'''
-
-
-        
-        
-
-FindSlubCache()
 '''
 gef> ptype struct kmem_cache
 type = struct kmem_cache {

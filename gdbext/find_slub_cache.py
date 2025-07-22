@@ -7,16 +7,16 @@ def remove_ansi_colors(text):
 
 class FindSlubCache(gdb.Command):
     """Find which SLUB kmem_cache a given address belongs to.
-    Usage: find_slub_cache_link <address>
+    Usage: find_slub_cache <address>
     by. naup96321
     """
 
     def __init__(self):
-        super(FindSlubCache, self).__init__("find_slub_cache_link", gdb.COMMAND_USER)
+        super(FindSlubCache, self).__init__("find_slub_cache", gdb.COMMAND_USER)
 
     def invoke(self, arg, from_tty):
         if not arg:
-            print("Usage: find_slub_cache_link <address>")
+            print("Usage: find_slub_cache <address>")
             return
 
         try:
@@ -74,7 +74,7 @@ class FindSlubCache(gdb.Command):
             caches.append(cache_info)
 
         for c in caches:
-            if int(c['kmem_cache'],16) == target - 0x68:
+            if int(c['kmem_cache'],16) == target:
                 print("find!, {}".format(c['name']))
         
         

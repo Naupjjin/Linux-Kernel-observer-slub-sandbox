@@ -7,16 +7,16 @@ def remove_ansi_colors(text):
 
 class FindSlubCache(gdb.Command):
     """Find which SLUB kmem_cache a given address belongs to.
-    Usage: find_slub_cache <address>
+    Usage: find_slub_cache_link <address>
     by. naup96321
     """
 
     def __init__(self):
-        super(FindSlubCache, self).__init__("find_slub_cache", gdb.COMMAND_USER)
+        super(FindSlubCache, self).__init__("find_slub_cache_link", gdb.COMMAND_USER)
 
     def invoke(self, arg, from_tty):
         if not arg:
-            print("Usage: find_slub_cache <address>")
+            print("Usage: find_slub_cache_link <address>")
             return
 
         try:
@@ -74,40 +74,8 @@ class FindSlubCache(gdb.Command):
             caches.append(cache_info)
 
         for c in caches:
-            if int(c['kmem_cache'],16) == target:
+            if int(c['kmem_cache'],16) == target - 0x68:
                 print("find!, {}".format(c['name']))
         
         
 FindSlubCache()
-
-'''
-struct kmem_cache {
-#ifndef CONFIG_SLUB_TINY
-	struct kmem_cache_cpu __percpu *cpu_slab;
-#endif
-	/* Used for retrieving partial slabs, etc. */
-	slab_flags_t flags;
-	unsigned long min_partial;
-	unsigned int size;		/* Object size including metadata */
-	unsigned int object_size;	/* Object size without metadata */
-	struct reciprocal_value reciprocal_size;
-	unsigned int offset;		/* Free pointer offset */
-#ifdef CONFIG_SLUB_CPU_PARTIAL
-	/* Number of per cpu partial objects to keep around */
-	unsigned int cpu_partial;
-	/* Number of per cpu partial slabs to keep around */
-	unsigned int cpu_partial_slabs;
-#endif
-	struct kmem_cache_order_objects oo;
-
-	/* Allocation and freeing of slabs */
-	struct kmem_cache_order_objects min;
-	gfp_t allocflags;		/* gfp flags to use on each alloc */
-	int refcount;			/* Refcount for slab cache destroy */
-	void (*ctor)(void *object);	/* Object constructor */
-	unsigned int inuse;		/* Offset to metadata */
-	unsigned int align;		/* Alignment */
-	unsigned int red_left_pad;	/* Left redzone padding size */
-	const char *name;		/* Name (only for display!) */
-	struct list_head list;		/* List of slab caches */
-'''
