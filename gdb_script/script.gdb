@@ -1,6 +1,9 @@
 set pagination off
 set confirm off
 
+source gdb_script/find_slub_cache_link.py
+source gdb_script/find_slub_cache.py
+
 define load_trace_slub
     set $text = 0xffffffffc0000000
     set $data = 0xffffffffc0201040
