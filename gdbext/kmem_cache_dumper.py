@@ -6,7 +6,7 @@ def remove_ansi_colors(text):
     ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
     return ansi_escape.sub('', text)
 
-class FindSlubCache(gdb.Command):
+class KmemCacheDumper(gdb.Command):
     """
     Linux kernel 6.15.7 
     Usage: kmem-cache-dumper 
@@ -21,7 +21,7 @@ class FindSlubCache(gdb.Command):
     """
 
     def __init__(self):
-        super(FindSlubCache, self).__init__("kmem-cache-dumper", gdb.COMMAND_USER)
+        super(KmemCacheDumper, self).__init__("kmem-cache-dumper", gdb.COMMAND_USER)
 
     def invoke(self, arg, from_tty):
 
@@ -101,4 +101,4 @@ class FindSlubCache(gdb.Command):
             start_addr = int(next_kmem_cache_ptr,16)
         
 
-FindSlubCache()
+KmemCacheDumper()

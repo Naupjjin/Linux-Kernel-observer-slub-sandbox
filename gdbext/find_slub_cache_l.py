@@ -5,14 +5,14 @@ def remove_ansi_colors(text):
     ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
     return ansi_escape.sub('', text)
 
-class FindSlubCache(gdb.Command):
+class FindSlubCacheL(gdb.Command):
     """Find which SLUB kmem_cache a given address belongs to.
     Usage: find_slub_cache_link <address>
     by. naup96321
     """
 
     def __init__(self):
-        super(FindSlubCache, self).__init__("find_slub_cache_link", gdb.COMMAND_USER)
+        super(FindSlubCacheL, self).__init__("find_slub_cache_link", gdb.COMMAND_USER)
 
     def invoke(self, arg, from_tty):
         if not arg:
@@ -78,4 +78,4 @@ class FindSlubCache(gdb.Command):
                 print("find!, {}".format(c['name']))
         
         
-FindSlubCache()
+FindSlubCacheL()
