@@ -1,5 +1,5 @@
 qemu-system-x86_64 \
-        -kernel ./kernel/bzbz \
+        -kernel ./kernel/bzImage_both \
         -initrd ./initramfs.cpio \
         -cpu qemu64,+smap,+smep \
         -smp 1 \
