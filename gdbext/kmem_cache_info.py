@@ -1,6 +1,6 @@
 import gdb
 import re
-from offset.kmem_cache_offset import KMEM_CACHE_OFFSET
+from offset.kmem_cache_offset import KMEM_CACHE_OFFSET, KMEM_CACHE_NODE_OFFSET
 
 def remove_ansi_colors(text):
     ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
@@ -18,6 +18,7 @@ class KmemCacheInfo(gdb.Command):
     def __init__(self):
         super(KmemCacheInfo, self).__init__("kmem-cache-info", gdb.COMMAND_USER)
         self.kmem_cache_ptr = 0
+        self.kmem_cache_node_ptr = 0
 
     def dump_flags(self):
         ptr = self.kmem_cache_ptr + KMEM_CACHE_OFFSET['flags']
@@ -38,6 +39,18 @@ class KmemCacheInfo(gdb.Command):
         output = gdb.execute(f"x/1s {hex(ptr)}", to_string=True).split()[-1][1:-1]
         print(f"\n**{output}**\n")
 
+    def dump_kmem_cache_node(self):
+        ptr = self.kmem_cache_ptr + KMEM_CACHE_OFFSET['node']
+        self.kmem_cache_node_ptr = int(gdb.execute(f"x/1xg {hex(ptr)}", to_string=True).split()[1],16)
+        print("\nkmem_cache_node[0] : ", hex(self.kmem_cache_node_ptr))
+
+    def dump_node_slab(self):
+        ptr = self.kmem_cache_node_ptr + KMEM_CACHE_NODE_OFFSET['partial']
+        output = int(gdb.execute(f"x/1xg {hex(ptr)}", to_string=True).split()[1],16)
+        
+
+        print("node slab : ", hex(output))
+
     def invoke(self, arg, from_tty):
 
         arg = arg.strip().split()
@@ -49,6 +62,9 @@ class KmemCacheInfo(gdb.Command):
         self.dump_flags()
         self.dump_size_and_object_size()
         print("=================")
+        self.dump_kmem_cache_node()
+        self.dump_node_slab()
+        
         
 
 KmemCacheInfo()

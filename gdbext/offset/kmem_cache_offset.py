@@ -23,6 +23,39 @@ KMEM_CACHE_OFFSET = {
     "node": 192,
 }
 
+KMEM_CACHE_NODE_OFFSET = {
+    "list_lock": 0,
+    "nr_partial": 8,
+    "partial": 16,
+    "nr_slabs": 32,
+    "total_objects": 40,
+    "full": 48,
+}
+
+SLAB_STRUCT_OFFSET = {
+    "__page_flags": 0,
+    "slab_cache": 8,
+
+    # slab_list 和 next/slabs 是 union，實際視使用情境而定
+    "slab_list": 16,    # struct list_head { next, prev }
+    "next": 16,         # struct slab *next
+    "slabs": 24,
+
+    # freelist + counters 的 union
+    "freelist": 32,
+    "counters": 40,
+    "inuse": 40,        # 位於 counters 的 bitfield (低16位)
+    "objects": 42,      # bitfield 第16~30位
+    "frozen": 43,       # bitfield 第31位
+
+    # callback_head 也是 union 的其中一個成員
+    "callback_head_next": 16,
+    "callback_head_func": 24,
+
+    "__page_type": 48,
+    "__page_refcount": 52,
+}
+
 '''
 gef> ptype struct kmem_cache
 type = struct kmem_cache {
@@ -128,4 +161,92 @@ ptype /o struct kmem_cache
                                /* total size (bytes):  704 */
                              }
 
+gef> ptype /o struct kmem_cache_node
+/* offset      |    size */  type = struct kmem_cache_node {
+/*      0      |       4 */    spinlock_t list_lock;
+/* XXX  4-byte hole      */
+/*      8      |       8 */    unsigned long nr_partial;
+/*     16      |      16 */    struct list_head {
+/*     16      |       8 */        struct list_head *next;
+/*     24      |       8 */        struct list_head *prev;
+
+                                   /* total size (bytes):   16 */
+                               } partial;
+/*     32      |       8 */    atomic_long_t nr_slabs;
+/*     40      |       8 */    atomic_long_t total_objects;
+/*     48      |      16 */    struct list_head {
+/*     48      |       8 */        struct list_head *next;
+/*     56      |       8 */        struct list_head *prev;
+
+                                   /* total size (bytes):   16 */
+                               } full;
+
+                               /* total size (bytes):   64 */
+                             }
+
+
+gef> ptype /o struct slab
+/* offset      |    size */  type = struct slab {
+/*      0      |       8 */    unsigned long __page_flags;
+/*      8      |       8 */    struct kmem_cache *slab_cache;
+/*     16      |      32 */    union {
+/*                    32 */        struct {
+/*     16      |      16 */            union {
+/*                    16 */                struct list_head {
+/*     16      |       8 */                    struct list_head *next;
+/*     24      |       8 */                    struct list_head *prev;
+
+                                               /* total size (bytes):   16 */
+                                           } slab_list;
+/*                    16 */                struct {
+/*     16      |       8 */                    struct slab *next;
+/*     24      |       4 */                    int slabs;
+/* XXX  4-byte padding   */
+
+                                               /* total size (bytes):   16 */
+                                           };
+
+                                           /* total size (bytes):   16 */
+                                       };
+/*     32      |      16 */            union {
+/*                    16 */                struct {
+/*     32      |       8 */                    void *freelist;
+/*     40      |       8 */                    union {
+/*                     8 */                        unsigned long counters;
+/*                     4 */                        struct {
+/*     40: 0   |       4 */                            unsigned int inuse : 16;
+/*     42: 0   |       4 */                            unsigned int objects : 15;
+/*     43: 7   |       4 */                            unsigned int frozen : 1;
+
+                                                       /* total size (bytes):    4 */
+                                                   };
+
+                                                   /* total size (bytes):    8 */
+                                               };
+
+                                               /* total size (bytes):   16 */
+                                           };
+/*                    16 */                freelist_aba_t freelist_counter;
+
+                                           /* total size (bytes):   16 */
+                                       };
+
+                                       /* total size (bytes):   32 */
+                                   };
+/*                    16 */        struct callback_head {
+/*     16      |       8 */            struct callback_head *next;
+/*     24      |       8 */            void (*func)(struct callback_head *);
+
+                                       /* total size (bytes):   16 */
+                                   } callback_head;
+/* XXX 16-byte padding   */
+
+                                   /* total size (bytes):   32 */
+                               };
+/*     48      |       4 */    unsigned int __page_type;
+/*     52      |       4 */    atomic_t __page_refcount;
+/* XXX  8-byte padding   */
+
+                               /* total size (bytes):   64 */
+                             }
 '''
