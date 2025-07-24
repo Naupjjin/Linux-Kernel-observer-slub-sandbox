@@ -1,5 +1,5 @@
 qemu-system-x86_64 \
-        -kernel ./kernel/bzImage_both \
+        -kernel ./kernel/bzImage \
         -initrd ./initramfs.cpio \
         -cpu qemu64,+smap,+smep \
         -smp 1 \
@@ -7,6 +7,6 @@ qemu-system-x86_64 \
         -append "console=ttyS0 quiet loglevel=7 oops=panic panic_on_warn=1 panic=-1 pti=on nokaslr" \
         -no-reboot \
         -nographic \
-        -monitor /dev/null \
+        -monitor unix:/tmp/qemu-monitor.sock,server,nowait \
         -gdb tcp::1234 \
         -S
